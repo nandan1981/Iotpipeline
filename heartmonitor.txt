@@ -1,0 +1,12 @@
+@echo off
+ECHO Transmitting the sensor data every 1 seconds.
+:top
+ECHO Transmitting data
+for /f %%I in ('wmic os get localdatetime ^|find "20"') do set dt=%%I
+REM dt format is now YYYYMMDDhhmmss...
+set dt=%dt:~4,2%-%dt:~2,2%-%dt:~0,4%
+echo %dt%
+set mytime=%time: =0%
+echo Current time is %dt%:%mytime%
+docker run -it --rm --name mqtt-publish --network iot_default efrecon/mqtt-client pub -h mosquitto  -t "heartmonitor" -m "{\"sensorId\":1000,\"message\":\"This is a heart monitor test - continuously\",\"value\":\"OFF\",\"timestamp\":\""%dt%:%mytime%"\"}" 
+goto top
